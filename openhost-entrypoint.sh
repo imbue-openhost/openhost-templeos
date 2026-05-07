@@ -68,10 +68,10 @@ fi
 
 QEMU_ARGS=(
     -name "templeos,process=qemu-templeos"
-    # 64 MiB is comfortable for TempleOS (its kernel needs ~16 MiB,
-    # the rest is user programs + RAMdisk).  Bumping this gains
-    # nothing for vanilla TempleOS but stays cheap.
-    -m 64
+    # TempleOS V5 prints "Requires 512Meg of RAM Memory" at boot if
+    # given less; the warning is non-fatal but ugly, and lazy
+    # allocation means the host barely notices the difference.
+    -m 512
     # TCG (no KVM): we don't get /dev/kvm in the OpenHost sandbox
     # and TempleOS is so simple that the JIT translation overhead
     # is invisible.
