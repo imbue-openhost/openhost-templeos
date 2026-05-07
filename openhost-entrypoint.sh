@@ -158,6 +158,10 @@ stop_websockify() {
 # Restart QEMU if it dies (TempleOS triple-faulting on a buggy
 # user program is part of the experience).  Cap the restart rate
 # so a perma-crashing image doesn't spin the CPU.
+#
+# We also watch websockify between QEMU restarts: if it crashed,
+# the browser path is dead and QEMU's screen is unreachable, so
+# spawn a fresh websockify before starting the next QEMU.
 
 trap 'stop_websockify; exit 130' INT TERM
 
@@ -168,8 +172,18 @@ start_websockify
 # and the user sees a "Failed to connect" toast.
 sleep 1
 
+ensure_websockify() {
+    if [[ -z "${WEBSOCKIFY_PID:-}" ]] || ! kill -0 "$WEBSOCKIFY_PID" 2>/dev/null; then
+        log "websockify is not running; starting it"
+        start_websockify
+        # Same race as the initial start: give it a moment to bind.
+        sleep 1
+    fi
+}
+
 restart_count=0
 while true; do
+    ensure_websockify
     log "Starting QEMU (restart_count=$restart_count)"
     if qemu-system-x86_64 "${QEMU_ARGS[@]}"; then
         log "QEMU exited cleanly; container is shutting down"
