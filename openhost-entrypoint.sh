@@ -89,10 +89,10 @@ QEMU_ARGS=(
     # TempleOS uses 640x480 16-color VGA.  -vga std exposes a
     # standard QEMU/Cirrus-style VGA card the OS knows how to drive.
     -vga std
-    # No sound.  TempleOS' audio is a beep generator; nothing
-    # important is lost by dropping it, and routing PCM through
-    # noVNC's audio channel adds complexity we don't need.
-    -audio none
+    # No audio: QEMU's default machine type for x86_64 (q35, pc)
+    # doesn't include a sound card unless we add one, so we just
+    # don't specify -audiodev / -soundhw at all.  TempleOS'
+    # PC-speaker beeps go to stdout/dev-null; nothing crucial.
     # No network.  TempleOS has no TCP/IP stack; a NIC would
     # just be ignored.
     -netdev user,id=none0,restrict=on
@@ -102,12 +102,16 @@ QEMU_ARGS=(
     # case is a partially-written file inside TempleOS, which the
     # user will notice immediately.
     -drive "file=$DISK,format=qcow2,if=ide,index=0,cache=writeback"
-    # Display via VNC on loopback.  websockify proxies the
-    # WebSocket->TCP bridge from the public port (6080) to here.
-    # ":0" = port 5900.  share=allow-exclusive lets a second
-    # client take over (e.g. if the first browser tab is closed
-    # without disconnecting cleanly).
-    -display "vnc=127.0.0.1:0,share=allow-exclusive"
+    # VNC on loopback.  websockify proxies the WebSocket->TCP
+    # bridge from the public port (6080) to here.  ":0" = port
+    # 5900.  share=allow-exclusive lets a second client take over
+    # (e.g. if the first browser tab is closed without
+    # disconnecting cleanly).
+    -vnc "127.0.0.1:0,share=allow-exclusive"
+    # The default machine type would also try to open an SDL/GTK
+    # display; -display none turns that off without disturbing the
+    # -vnc server.
+    -display none
     # No QEMU monitor on stdin: we want stdin for the foreground
     # logger.  -monitor none disables the default redirect.
     -monitor none
