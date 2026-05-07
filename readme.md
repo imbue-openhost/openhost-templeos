@@ -46,35 +46,21 @@ The app is gated behind the OpenHost owner-auth wall (no
 
 ## First boot
 
-The image ships with the TempleOS install ISO at `/opt/TempleOS.ISO`.
-On first boot the persistent disk is empty, so QEMU is started with
-the ISO attached and `boot order=dc` (CD-ROM first, then disk).  You'll
-land on the TempleOS installer.
+The image ships with the TempleOS install ISO at `/opt/TempleOS.ISO`,
+attached to QEMU as a CD-ROM device on every boot.  QEMU's boot order
+is `cd` — disk first, CD-ROM as fallback.  On first boot the disk has
+no MBR, so QEMU falls through to the CD-ROM and you land on the
+TempleOS installer.  Walk through it once (~30 seconds, mostly hitting
+Enter; pick "Yes" to install, US keyboard layout `1`, CPU count `1`).
 
-Walk through the prompts (this takes ~30 seconds; the installer is
-mostly hitting enter):
+After the installer writes a Red Sea filesystem to the disk, the disk
+has a valid MBR and QEMU's boot order picks it up first on every
+subsequent boot.  The CD-ROM stays attached but is never the boot
+medium again — same as how a physical PC behaves with the install
+media left in the tray.
 
-1. The blue installer screen appears.  Hit **Enter** to start.
-2. Pick "Yes" to install.
-3. Pick a keyboard layout (US is `1`).
-4. Pick a CPU count (1 is fine for emulation).
-5. Wait for the install to finish (10–20 seconds).
-6. The installer says you can reboot.  Don't actually reboot; we'll
-   handle it from the host.
-
-Then back on the host, mark the install complete:
-
-```sh
-oh app exec templeos touch /data/app_data/templeos/.installed
-oh app reload templeos
-```
-
-(Why the manual marker?  TempleOS' installer is interactive and we'd
-rather not parse its question prompts to detect completion.  The
-`.installed` flag tells the entrypoint to skip the ISO and boot the
-disk on subsequent starts.)
-
-After this, every restart goes straight to your installed TempleOS.
+There's no "mark complete" step needed.  The disk MBR is the source
+of truth.
 
 ## Running TempleOS
 

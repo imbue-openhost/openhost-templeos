@@ -34,7 +34,6 @@ fi
 
 PERSIST_DIR="$OPENHOST_APP_DATA_DIR"
 DISK="$PERSIST_DIR/templeos.qcow2"
-INSTALLED_MARKER="$PERSIST_DIR/.installed"
 ISO=/opt/TempleOS.ISO
 
 # ---------------------------------------------------------------- disk
@@ -121,21 +120,15 @@ QEMU_ARGS=(
     -no-reboot
 )
 
-if [[ ! -f "$INSTALLED_MARKER" ]]; then
-    log "First boot: attaching install ISO and booting from CD-ROM"
-    log "(Once TempleOS finishes installing to disk, run:"
-    log "  oh app exec templeos touch $INSTALLED_MARKER"
-    log " to switch to disk-only boot on subsequent restarts.)"
-    QEMU_ARGS+=(
-        -cdrom "$ISO"
-        -boot "order=dc,menu=off"
-    )
-else
-    log "Booting from persistent disk (installed marker present)"
-    QEMU_ARGS+=(
-        -boot "order=c,menu=off"
-    )
-fi
+log "Attaching install ISO; QEMU boot order is disk first, then CD-ROM"
+log "(On first boot the disk has no MBR so QEMU falls through to the"
+log " CD-ROM and you land on the TempleOS installer.  After you've"
+log " installed to disk, the disk's MBR takes precedence on every"
+log " subsequent boot and the ISO is silently ignored.)"
+QEMU_ARGS+=(
+    -cdrom "$ISO"
+    -boot "order=cd,menu=off"
+)
 
 # ---------------------------------------------------------------- websockify
 #
