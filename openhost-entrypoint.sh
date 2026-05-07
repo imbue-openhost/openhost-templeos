@@ -83,9 +83,14 @@ QEMU_ARGS=(
     # doesn't include a sound card unless we add one, so we just
     # don't specify -audiodev / -soundhw at all.  TempleOS'
     # PC-speaker beeps go to stdout/dev-null; nothing crucial.
-    # No network.  TempleOS has no TCP/IP stack; a NIC would
-    # just be ignored.
-    -netdev user,id=none0,restrict=on
+    # No network: TempleOS has no TCP/IP stack at all, and
+    # -nic none is the canonical "explicitly no NIC, no backend"
+    # form (versus a dangling -netdev with no -device frontend,
+    # which produces a `netdev ... has no peer` warning at
+    # startup on QEMU 7+).  -nic none also short-circuits
+    # the SLIRP user-mode stack initialization, saving ~30ms
+    # of cold-start time.
+    -nic none
     # The persistent disk.  -drive (not -hda) so we can specify
     # cache mode.  cache=writeback is safe enough for a single-user
     # OS that doesn't fsync; if QEMU is killed mid-write the worst
@@ -165,7 +170,14 @@ stop_websockify() {
 # the browser path is dead and QEMU's screen is unreachable, so
 # spawn a fresh websockify before starting the next QEMU.
 
-trap 'stop_websockify; exit 130' INT TERM
+# EXIT trap covers every shell-exit path uniformly, including
+# `exit 1` from die() (e.g. the QEMU-restart-cap branch) and
+# implicit exit on unhandled `set -e` errors.  INT/TERM also
+# exit 130, which still triggers the EXIT handler — bash runs
+# the EXIT trap exactly once at script termination regardless
+# of whether INT/TERM or exit got us there.
+trap 'stop_websockify' EXIT
+trap 'exit 130' INT TERM
 
 start_websockify
 

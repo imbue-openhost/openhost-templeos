@@ -98,10 +98,13 @@ again.
 
 ## Resource use
 
-Defaults: 512 MiB RAM, 0.5 CPU.  TempleOS uses ~64 MiB RAM at runtime;
-the rest is QEMU overhead and slack.  Bump these in `openhost.toml`
-if you load a CPU-heavy demo, but the emulator's TCG JIT is the
-bottleneck before any RAM-related limit kicks in.
+Container limits (set in `openhost.toml`): 1 GiB RAM, 0.5 CPU.
+QEMU's guest gets `-m 512` (512 MiB), TempleOS uses ~64 MiB of
+that at runtime; the rest is QEMU overhead and slack.  Bump
+`memory_mb` in `openhost.toml` (and adjust the QEMU `-m` flag in
+`openhost-entrypoint.sh`) if you load a memory-heavy demo, but
+the emulator's TCG JIT is the bottleneck before any RAM-related
+limit kicks in.
 
 ## Security
 
