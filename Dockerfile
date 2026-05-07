@@ -63,10 +63,10 @@ RUN curl -fsSL -o /opt/TempleOS.ISO https://templeos.org/Downloads/TempleOS.ISO 
         exit 1; \
     }
 
-# Health check / placeholder index that displays a friendlier "TempleOS
-# is starting" page while QEMU is still booting.  Served by websockify
-# from /usr/share/novnc/ so we just drop our static file alongside
-# noVNC's vnc.html.
+# Drop our own /usr/share/novnc/index.html that auto-redirects to
+# vnc_lite.html with the right query string for the websockify
+# proxy path.  Without this, hitting / would 404 (noVNC ships
+# vnc_lite.html but no index).
 COPY index.html /usr/share/novnc/index.html
 
 COPY openhost-entrypoint.sh /usr/local/bin/openhost-entrypoint.sh

@@ -92,9 +92,9 @@ OpenHost app's persistent data.
 A fresh qcow2 with TempleOS installed and untouched is ~30 MB; it
 grows as you write to TempleOS.
 
-To reset to factory defaults: stop the app, delete the `.installed`
-marker AND `templeos.qcow2`, restart the app, run through the
-installer again.
+To reset to factory defaults: stop the app, delete `templeos.qcow2`
+from the persistent dir, restart the app, run through the installer
+again.
 
 ## Resource use
 

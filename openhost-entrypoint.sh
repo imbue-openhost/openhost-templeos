@@ -53,27 +53,16 @@ fi
 
 # ---------------------------------------------------------------- boot mode
 #
-# First boot: persistent dir has the qcow2 we just created but no
-# .installed marker.  We attach the install ISO and tell QEMU to
-# boot from CD-ROM first, falling back to disk.  The user runs
-# the TempleOS installer (a one-time, ~30-second operation) and
-# then writes the marker.
+# We always attach the install ISO as a CD-ROM and use boot
+# order=cd (disk first, then CD-ROM).  On first boot the qcow2
+# has no MBR, so QEMU falls through to the CD-ROM and the user
+# lands on the TempleOS installer.  After the installer writes a
+# Red Sea filesystem to the disk, the disk's MBR satisfies QEMU's
+# disk-first boot order and the CD-ROM is never used again.
 #
-# Subsequent boots: the marker exists, so we boot directly from
-# disk and skip the ISO entirely.  Faster and avoids the user
-# accidentally re-installing on top of their work.
-#
-# We can't really automate the install: TempleOS' installer asks
-# a few questions (keyboard layout, locale, CPU count) that we'd
-# have to drive over a screen we don't see.  The interactive
-# install is fast enough that scripting it isn't worth the
-# brittleness.
-#
-# We expose a tiny HTTP endpoint so the user can mark the install
-# complete from inside their host browser, but for v0.1 we just
-# accept that the user touches the marker file themselves once
-# done (`oh app exec templeos touch /data/app_data/templeos/.installed`,
-# or via the file-browser app on the same compute space).
+# This matches how a physical PC behaves with the install media
+# left in the tray, and avoids needing any explicit "installation
+# done" signal — the disk MBR is the source of truth.
 
 QEMU_ARGS=(
     -name "templeos,process=qemu-templeos"
@@ -141,9 +130,10 @@ QEMU_ARGS+=(
 
 LISTEN_PORT="${PORT:-6080}"
 
-# /usr/share/novnc/index.html is our placeholder; vnc.html is
-# noVNC's actual client.  We redirect / -> vnc.html through a
-# small index that auto-loads the client with the right path.
+# /usr/share/novnc/index.html is our placeholder.  noVNC's lite
+# client lives at vnc_lite.html in the same dir; our index.html
+# redirects / -> vnc_lite.html with the right query string so the
+# user just hits the app URL and the connection autostarts.
 
 start_websockify() {
     log "Starting websockify on 0.0.0.0:$LISTEN_PORT"
