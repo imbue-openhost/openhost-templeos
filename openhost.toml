@@ -1,0 +1,28 @@
+[app]
+name = "templeos"
+version = "0.1.0"
+description = "TempleOS in QEMU, accessible from any modern web browser"
+
+[runtime.container]
+image = "Dockerfile"
+# noVNC static HTML + websockify on the same port. Browsers connect
+# via the OpenHost router; the container itself only listens on
+# loopback-via-router.
+port = 6080
+
+[resources]
+# TempleOS itself wants 64 MB of RAM and a single core.  QEMU adds
+# ~150 MB of overhead and noVNC/websockify is negligible.  This is
+# slack to spare; bump down to 384 MB if you're tight.
+memory_mb = 512
+cpu_millicores = 500
+
+[data]
+# Persistent disk image lives at $OPENHOST_APP_DATA_DIR/templeos.qcow2.
+# First boot creates an empty 1 GiB image; user runs the TempleOS
+# installer once, and the qcow2 grows as TempleOS writes to it.
+app_data = true
+
+# No public_paths: browser-controlled access to a fully-privileged
+# emulated machine is owner-only.  The OpenHost auth gate keeps
+# anonymous visitors out.

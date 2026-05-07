@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<!--
+    openhost-templeos landing page.  noVNC's own vnc.html expects
+    a ?host=...&port=...&path=... query string; rather than make
+    the user know that, we redirect to vnc_lite.html (the simpler
+    auto-connecting client) with the right path baked in.
+
+    websockify mounts /usr/share/novnc at /, so this file is served
+    as the directory index.  vnc_lite.html and the rest of the
+    noVNC bundle are siblings.
+-->
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>TempleOS</title>
+    <style>
+        body {
+            background: #000;
+            color: #fff;
+            font-family: monospace;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+        a { color: #ff0; }
+    </style>
+</head>
+<body>
+    <noscript>
+        TempleOS requires JavaScript to display in your browser.
+    </noscript>
+    <script>
+        // Hand off to noVNC's lite client.  resize=scale fits the
+        // 640x480 VGA framebuffer to whatever browser window the
+        // user has, autoconnect skips the connect-button screen.
+        window.location.replace(
+            "vnc_lite.html"
+            + "?autoconnect=true"
+            + "&resize=scale"
+            + "&path=websockify"
+        );
+    </script>
+</body>
+</html>
