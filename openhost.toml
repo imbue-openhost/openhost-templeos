@@ -5,9 +5,11 @@ description = "TempleOS in QEMU, accessible from any modern web browser"
 
 [runtime.container]
 image = "Dockerfile"
-# noVNC static HTML + websockify on the same port. Browsers connect
-# via the OpenHost router; the container itself only listens on
-# loopback-via-router.
+# websockify serves the noVNC static HTML and proxies the
+# WebSocket->TCP bridge to QEMU's VNC server, all on this port.
+# OpenHost only exposes container ports to the host loopback, and
+# the OpenHost router is the only thing that proxies through to
+# them; browsers reach this app via the auth-gated public URL.
 port = 6080
 
 [resources]

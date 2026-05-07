@@ -8,10 +8,12 @@
 #   1. Make sure the persistent disk image exists at
 #      $OPENHOST_APP_DATA_DIR/templeos.qcow2.  Create it the first
 #      time we run.
-#   2. Start QEMU with the right -boot/-cdrom/-drive args.  Until
-#      the user has installed TempleOS to disk we keep the install
-#      ISO attached and boot from it; afterwards we switch to
-#      booting the disk only.
+#   2. Start QEMU with the install ISO always attached as a
+#      CD-ROM and boot order=cd (disk first, CD-ROM as fallback).
+#      A fresh disk has no MBR so QEMU falls through to the ISO
+#      and the user lands on the installer; once installed, the
+#      disk MBR satisfies the disk-first boot order and the ISO
+#      stays attached but is never used as the boot medium again.
 #   3. Start websockify in noVNC mode so browsers can reach QEMU's
 #      VNC server.
 #
