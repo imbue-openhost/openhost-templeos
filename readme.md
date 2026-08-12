@@ -1,7 +1,7 @@
-# openhost-templeos
+# bottled-templeos
 
 [Terry A. Davis's TempleOS](https://templeos.org), running inside QEMU,
-viewable from any modern web browser, packaged as an OpenHost app.
+viewable from any modern web browser, packaged as a Cloud in a Bottle app.
 
 > **TempleOS is a 64-bit, ring-0, single-address-space, single-user,
 > public-domain operating system.  It expects to own the whole machine,
@@ -14,7 +14,7 @@ viewable from any modern web browser, packaged as an OpenHost app.
   `https://templeos.<your-compute-space>/`.
 - The full TempleOS desktop (HolyC compiler, demos, games, the works)
   in a 640x480x16-color VGA window scaled to fit your browser.
-- A 1 GiB qcow2 disk image stored on the OpenHost persistent volume
+- A 1 GiB qcow2 disk image stored on the Cloud in a Bottle persistent volume
   that survives container rebuilds.
 
 ## Architecture
@@ -38,10 +38,10 @@ working scale.
 ## Deploying
 
 ```sh
-oh app deploy https://github.com/imbue-openhost/openhost-templeos --wait
+oh app deploy https://github.com/imbue-openhost/bottled-templeos --wait
 ```
 
-The app is gated behind the OpenHost owner-auth wall (no
+The app is gated behind the Cloud in a Bottle owner-auth wall (no
 `public_paths` is declared).  Only you can reach the URL.
 
 ## First boot
@@ -87,7 +87,7 @@ to be playable, but everything else is responsive.
 The single source of truth is `$OPENHOST_APP_DATA_DIR/templeos.qcow2`
 on the host (typically `/data/app_data/templeos/templeos.qcow2`).
 Back it up, or copy it elsewhere, the same way you would any other
-OpenHost app's persistent data.
+Cloud in a Bottle app's persistent data.
 
 A fresh qcow2 with TempleOS installed and untouched is ~30 MB; it
 grows as you write to TempleOS.
@@ -106,15 +106,15 @@ bottleneck before any RAM-related limit kicks in.
 ## Security
 
 - The desktop is **owner-only** (no `public_paths`).  Anyone who
-  reaches the URL can drive the emulated machine; OpenHost auth
+  reaches the URL can drive the emulated machine; Cloud in a Bottle auth
   ensures only you do.
 - TempleOS has no concept of security boundaries; it runs everything
   in ring 0 in a single address space.  This is fine because the
   whole machine is QEMU, and QEMU has its own well-tested userspace
   isolation.  An attacker who compromises TempleOS is inside QEMU,
-  not inside the OpenHost container.
+  not inside the Cloud in a Bottle container.
 - No special Linux capabilities, no privileged opt-in, no devices.
-  This is one of the cleanest OpenHost apps: a normal-uid container
+  This is one of the cleanest Cloud in a Bottle apps: a normal-uid container
   running an unprivileged user-space emulator.
 
 ## Known limitations
@@ -134,7 +134,7 @@ bottleneck before any RAM-related limit kicks in.
 
 ## Files
 
-- `openhost.toml` — OpenHost manifest.
+- `openhost.toml` — Cloud in a Bottle manifest.
 - `Dockerfile` — debian-slim + qemu + novnc + the TempleOS ISO.
 - `openhost-entrypoint.sh` — creates the qcow2 disk on first boot,
   starts QEMU and websockify, restarts QEMU if it crashes.
